@@ -10,8 +10,8 @@ export default function Navigation() {
 
     return (
 
-      <nav className={`${displayNavigation ? '' : 'hidden'} 
-        w-[16rem] h-full bg-gray-900 text-gray-300 p-2
+      <nav className={`${displayNavigation ? 'animate-nav-in animate-nav-appear' : 'hidden'} 
+        w-[16rem] min-h-screen bg-gray-900 text-gray-300 p-2 rounded-lg
        
         `}>
         <Button

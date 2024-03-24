@@ -4,7 +4,10 @@ import React, { createContext, useMemo, useState } from "react";
 const AppContext = createContext();
 
 export default function AppProvider({ children }) {
-  const [state, setState] = useState({ displayNavigation:true });
+  const [state, setState] = useState({ 
+    displayNavigation:true ,
+    themeMode: "light",
+  });
   const contextValue = useMemo(() =>{
     return {
       state,

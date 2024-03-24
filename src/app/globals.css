@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  a:link, a:visited, :active,a:hover{
+    /* color: #fff; */
+  }
+}
 
 html,body {
   height: 100%;
@@ -13,6 +18,9 @@ html,body {
 #root {
   padding: 24px;
 }
+
+
+
 
 @layer utilities {
   .text-balance {
