@@ -8,9 +8,6 @@ export default function Main() {
       <TopBar />
       <Banner />
       <DisplayList />
-      <div>
-        casfa
-      </div>
     </main>
   )
 }
