@@ -13,11 +13,13 @@ export default function Map() {
   const [showWeatherResult, setShowWeatherResult] = useState();
   /* 关闭天气Card */
   const [closeWeatherHook, setCloseWeatherHook] = useState(false);
+
   /* 地图 */
   const mapContainerRef = useRef(null);
   const panelRef = useRef(null);
   const mapRef = useRef(null);
-  const drivingRef = useRef(null);
+  const planRouteRef = useRef(null);
+  const curentCity = useRef(null);
  
 
   
@@ -62,6 +64,7 @@ export default function Map() {
       if (status === 'complete' && result.info === 'OK') {
         /* 获取当前城市 */
         const city = result.city;
+        curentCity.current = city;
         /* 获取当前城市的天气信息 */
         getWeather(AMap,map,city);
       }
@@ -103,6 +106,7 @@ export default function Map() {
   const [state, dispatch] = useReducer(toolsReducer, initialState);
   /* 选择出行方式 */
   const handleTravelModeChange = (e) => {
+    removePlanRoute(state.travelMode);
     dispatch({ type: 'SET_TRAVEL_MODE', payload: e.target.value });
   };
   /* 起点 */
@@ -114,52 +118,95 @@ export default function Map() {
     dispatch({ type: 'SET_END_POINT', payload: e.target.value });
   };
 
+  /* 清除路径规划 */
+  const removePlanRoute = (mode) => {
+    if (planRouteRef.current) {
+      planRouteRef.current.clear();
+    }
+    planRouteRef.current = null;
+  };
+
   /* 提交规划表单 */
-  const handleSubmit = () => {
+  const handleSubmit =  async () => {
     if (!state.startPoint ||!state.endPoint) {
       messageApi.open({
         type: 'error',
         content: '起点或终点不能为空',
       });
     return;
-    }
-    switch (state.travelMode) {
-      case 'DRIVING':{
-        driving(mapRef.current);
-        break;
-      }
-      case 'WALKING':{
-        console.log('步行出行');
-        break;
-      }
-      case 'BICYCLING':{
-        console.log('骑行出行');
-        break;
-      }
-      case 'TRANSFER':{
-        console.log('公交出行');
-        break;
-      }
-      default: break;
-    }
+    };
+    /* 地点转换经纬度 */
+    const lnglatStart = await getLongitube(state.startPoint);
+    const lnglatEnd = await getLongitube(state.endPoint);
+    
+    planRoute(mapRef.current, lnglatStart, lnglatEnd, state.travelMode,panelRef.current,curentCity.current);
   }
 
-  const driving =  () => {
-    if (!drivingRef.current) {
-        drivingRef.current = new AMap.Driving({
-        map: mapRef.current,
-        panel: panelRef.current,
-        autoFitView: true,
+  const getLongitube =  (place) => {
+    return new Promise((resolve, reject) => {
+      let geocoder = new AMap.Geocoder({
+        city:'全国'
       });
-    }
-    drivingRef.current.search([{keyword: state.startPoint, city: '全国'}, {keyword: state.endPoint, city:'全国'}], (status, result) => {
-      if (status === 'complete' && result.info === 'OK') {
-        console.log(result);
-      } else {
-        console.log(status);
-      }
+      geocoder.getLocation(place, function(status, result) {
+        if (status === 'complete' && result.info === 'OK') {
+          const lnglat = result.geocodes[0].location;
+          resolve(lnglat);
+        } else {
+          reject(new Error('获取经纬度失败'));
+        }
+      });
     });
   };
+
+
+
+  /* 出行规划 */
+  const planRoute = (map, start, end, mode,panel,city) => {
+    const options = {
+      map,
+      panel,
+      autoFitView:true,
+      policy: 0, // 0：速度优先
+    }
+
+    const transferOptions = {
+      map,
+      city,
+      nightflag:1,
+      autoFitView:true,
+      policy: AMap.TransferPolicy.LEAST_TIME,
+      panel,
+    };
+    
+    if (!planRouteRef.current) {
+      switch (mode) {
+        case 'Driving':{
+          planRouteRef.current = new AMap.Driving(options);
+          break;
+        }
+        case 'Walking':{
+          planRouteRef.current = new AMap.Walking(options);
+          break;
+        }
+        case 'Riding':{
+          planRouteRef.current = new AMap.Riding(options);
+          break;
+        }
+        case 'Transfer':{
+          planRouteRef.current = new AMap.Transfer(transferOptions);
+          break;
+        }
+      }
+    }
+
+    planRouteRef.current.search([start.lng, start.lat], [end.lng, end.lat], function(status, result) {
+      if (status === 'complete') {
+      }else {
+        console.log(status);
+      }
+    })
+  };
+
 
 
 
@@ -173,7 +220,7 @@ export default function Map() {
       key: 'aa6c92a807de065ca1e75689bdbafc07',
       version: '2.0',
       plugins: ['AMap.Geocoder', 'AMap.PlaceSearch',  'AMap.ToolBar', 
-      'AMap.Driving', "AMap.Weather","AMap.Geolocation","AMap.CitySearch"],
+      'AMap.Driving',"AMap.Walking", "AMap.Weather","AMap.Transfer","AMap.Riding","AMap.Geolocation","AMap.CitySearch"],
      
     })
     .then((AMap) => {
@@ -220,7 +267,8 @@ export default function Map() {
       </div>
       <div className="dark:bg-gray-800 dark:text-gray-100 w-full h-full bg-gray-100 flex-1">
       <div id="container"  ref={mapContainerRef}  className='w-full h-full'></div>
-      <div id="panel"></div>
+      <div id="panel" ref={panelRef} className="absolute top-0 right-0 z-10   w-[200px]   overflow-y-scroll"></div>
+      
       </div>
     </div>
   )

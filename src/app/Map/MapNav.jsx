@@ -78,10 +78,10 @@ export const MapNav = ({
       </Form.Item>
       <Form.Item label="出行方式">
         <Radio.Group onChange={handleTravelModeChange} value={state.travelMode}>
-          <Radio value="DRIVING">驾车</Radio>
-          <Radio value="WALKING">步行</Radio>
-          <Radio value="BICYCLING">骑行</Radio>
-          <Radio value="TRANSIT">公交</Radio>
+          <Radio value="Driving">驾车</Radio>
+          <Radio value="Walking">步行</Radio>
+          <Radio value="Riding">骑行</Radio>
+          <Radio value="Transfer">公交</Radio>
         </Radio.Group>
       </Form.Item>
       <Button type="primary" className='align-self-center' onClick={handleSubmit}>搜索</Button>
