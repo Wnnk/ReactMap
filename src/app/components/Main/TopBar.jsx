@@ -8,7 +8,7 @@ export default function TopBar() {
   /* 主题模式 */
   const { state: {themeMode}, setState } = useAppContext();
 
-  const toLink = [{linkName: 'Home', linkUrl: '/'},{linkName: 'Map', linkUrl: '/Map'},{linkName: 'About', linkUrl: '/About'}]
+  const toLink = [{linkName: 'Home', linkUrl: '/'},{linkName: 'Map', linkUrl: '/Map'},{linkName: 'CanvasBoard', linkUrl: '/CanvasBoard'}]
 
   return (
     <div className={` flex items-center ml-16 mb-32`}>
