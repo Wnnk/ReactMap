@@ -19,7 +19,7 @@ module.exports = {
         'nav-appear': {
           '0%': { opacity: 0, display: 'none' },
           '100%': { opacity: 1 },
-        }
+        },
       },
       animation: {
         'nav-in': 'nav-in 0.5s ease-in-out forwards',
