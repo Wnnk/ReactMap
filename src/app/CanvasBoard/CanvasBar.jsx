@@ -3,6 +3,7 @@ import {  Tabs, Form,  Slider, ConfigProvider,ColorPicker  } from 'antd';
 import { CloseOutlined, UnorderedListOutlined, } from '@ant-design/icons';
 import { BorderOutlined } from '@ant-design/icons';
 import { useState } from 'react';
+import {TextType} from "./TextType" 
 
 
 
@@ -11,7 +12,7 @@ export const CanvasBar = ({changeFreeLine}) => {
     const items = [
         {key: '绘画', label: '绘画', children:<PaintType changeFreeLine={changeFreeLine} />},
         {key: '橡皮搽', label: '橡皮搽', children:<Eraser changeFreeLine={changeFreeLine} />},
-        {key: '3', label: 'Layer 3', children:'Layer 3 content'},
+        {key: '文字绘制', label: '文字绘制', children:<TextType changeFreeLine={changeFreeLine} />},
         {key: '4', label: 'Layer 4', children:'Layer 4 content'},
     ];
     /* 切换tab */
@@ -25,6 +26,9 @@ export const CanvasBar = ({changeFreeLine}) => {
                 changeFreeLine('isClearing',true);
                 break;
             }
+            case '文字绘制':{
+                changeFreeLine('isClearing',false);
+            };
         }
     };
 
@@ -82,7 +86,6 @@ const FreePaint = ({changeFreeLine}) => {
                 >
                     <Slider defaultValue={1} min={1} max={10} onChange={(value) =>{changeFreeLine('lineWidth',value)}} />
                 </ConfigProvider>
-                
             </Form.Item>
             <Form.Item label="画笔颜色">
             <ColorPicker defaultValue="#000" defaultFormat ="rgb" onChangeComplete={(color) => {changeFreeLine('color',`${color.toHexString()}`)}}/>
@@ -107,7 +110,8 @@ const FreePaint = ({changeFreeLine}) => {
 const ShapePaint = ({changeFreeLine}) => {
     const items = [
         {icon:<BorderOutlined  />,label:'矩形',value:'rect'},
-        {icon:<BorderOutlined />,label:'圆形',value:'circle'},
+        {icon:<i className='iconfont icon-big-circle'></i>,label:'圆形',value:'circle'},
+        {icon:<i className='iconfont icon-xingzhuang-sanjiaoxing'></i>,label:'三角形',value:'triangle'},
     ];
     const [active, setActive] = useState('');
     return (

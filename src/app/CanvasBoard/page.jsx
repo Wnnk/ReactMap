@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef,useState  } from "react"
+import { useEffect, useRef  } from "react"
 import {CanvasBar } from "./CanvasBar"
 import { BoardFooter } from "./BoardFooter";
 
@@ -9,39 +9,42 @@ export default function CanvasBoard () {
     const canvasEl = useRef(null);
     let ctx = useRef(null);
     let freeLine = {
+        /* 历史记录，用于撤销与反撤销 */
         history: [],  //鼠标位置记录
         index: 0,  //历史记录索引
+        /* 画笔样式相关 */
         color: "black", //画笔颜色
         lineWidth: 1, //最后画笔宽度
-        isDrawing: false, //是否正在绘画
-        lastPoint: {x:0,y:0}, //上一次鼠标位置
-        newPoint: {x:0,y:0}, //当前鼠标位置
-        isClearing: false, //是否正在清除
         clearWidth: 10, //清除宽度
         shadowBlur: 10, //阴影模糊度
         shadowColor: "rgba(0,0,0,0.8)", //阴影颜色
+        /* 位置相关 */
+        lastPoint: {x:0,y:0}, //上一次鼠标位置
+        newPoint: {x:0,y:0}, //当前鼠标位置
+        /* 画笔状态 */
+        isClearing: false, //是否正在清除
+        isDrawing: false, //是否正在绘画
+        /* 画笔类型 */
         type: 'free', //作画类型
-        
+        /* 文本相关 */
+        text: "", //文本内容
+        textFont: "serif" ,//文本字体
+        textSize: 16, //文本大小
+        textColor: "black" //文本颜色
     }
 
 
     const mouseDown = (e) => {
-        // const data = ctx.current.getImageData(0,0,ctx.current.canvas.width,ctx.current.canvas.height);
-        /* 快照 */
-        // saveHistory(data);
         freeLine.isDrawing = true;
         const x = e.clientX; const y = e.clientY;
         freeLine.lastPoint = {x,y};
         if (freeLine.type !== 'text') {
-            drawPoint(x,y,0);
+            drawPoint(x,y,freeLine.lineWidth);
             return;
-        } else if (freeLine.type === 'text') {
-
-        }
-              
-           
-        
-        
+        } else if(freeLine.type === 'text') {
+            drawText(x,y,freeLine.text);
+            return;
+        }     
     };
 
     const drawPoint = (x,y,radius) => {
@@ -67,6 +70,17 @@ export default function CanvasBoard () {
                 drawRect(freeLine.lastPoint.x,freeLine.lastPoint.y,freeLine.newPoint.x,freeLine.newPoint.y);
                 break;
             }
+            case "circle": {
+                drawCircle(freeLine.lastPoint.x,freeLine.lastPoint.y,freeLine.newPoint.x,freeLine.newPoint.y);
+                break;
+            }
+            case "triangle": {
+                drawTriangle(freeLine.lastPoint.x,freeLine.lastPoint.y,freeLine.newPoint.x,freeLine.newPoint.y);
+                break;
+            }
+            // case "text": {
+            //     drawText(freeLine.newPoint.x,freeLine.newPoint.y,freeLine.text);
+            // }
         };
        
        
@@ -142,7 +156,47 @@ export default function CanvasBoard () {
         ctx.current.stroke();
         return;
     };
+
+    /**
+     * @description 画三角形
+     * @param {number} x1 鼠标按下时的x坐标
+     * @param {number} y1 鼠标按下时的y坐标
+     * @param {number} x2 三角形顶点x坐标
+     * @param {number} y2 三角形顶点y坐标
+     */
+
+    const drawTriangle = (x1,y1,x2,y2) => {
+        ctx.current.putImageData(freeLine.history[freeLine.history.length - 1],0,0);
+        ctx.current.beginPath();
+        ctx.current.moveTo(x1,y1);
+        ctx.current.lineTo(x2,y1);
+        ctx.current.lineTo((x1+x2) / 2, y2);
+        ctx.current.lineTo(x1,y1);
+        ctx.current.stroke();
+        ctx.current.closePath();
+        return;
+
+    };
+
+    /**
+     * @description 绘制文本预览
+     * @param {number} x 文本x坐标
+     * @param {number} y 文本y坐标
+     * @param {string} text 文本内容
+     * @returns {void}
+     **/
     
+    const drawText = (x,y,text) => {
+        /* 拼接文本大小和字体 */
+        const font = freeLine.textSize + "px" + " " + freeLine.textFont;
+        console.log(font);
+        ctx.current.font = font;
+        ctx.current.fillStyle = freeLine.textColor;
+        ctx.current.textAlign = "center";
+        ctx.current.fillText(text,x,y);
+        return;
+    };
+
     /* 保存历史 */
     const saveHistory = (data) => {
         /* 回撤时添加画布数据，删除临时数据 */
