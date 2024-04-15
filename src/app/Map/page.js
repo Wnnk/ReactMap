@@ -1,11 +1,11 @@
 "use client"
-import AMapLoader from '@amap/amap-jsapi-loader';
+ //import AMapLoader from '@amap/amap-jsapi-loader';
 import { useAppContext } from "../AppContext"
 import { MapNav } from "./MapNav";
 import { useState, useEffect, useReducer, useRef  } from "react";
 import { Weather } from "./Weather";
 import toolsReducer from './toolsReducer';
-
+import Head from 'next/head';
 export default function Map() {
   /* 主题 */
   const { state: {themeMode}, setState } = useAppContext();
@@ -210,43 +210,58 @@ export default function Map() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      window._AMapSecurityConfig = {
-        securityJsCode: "8354e71f73abf634688a42c35b800e0d",
-      };
+      import('@amap/amap-jsapi-loader').then(AMapLoader => {
+        window._AMapSecurityConfig = {
+          securityJsCode: "8354e71f73abf634688a42c35b800e0d",
+        };
+        AMapLoader.load({
+          key: 'aa6c92a807de065ca1e75689bdbafc07',
+          version: '2.0',
+          plugins: ['AMap.Geocoder', 'AMap.PlaceSearch',  'AMap.ToolBar', 
+          'AMap.Driving',"AMap.Walking", "AMap.Weather","AMap.Transfer","AMap.Riding","AMap.Geolocation","AMap.CitySearch"],
+         
+        })
+        .then((AMap) => {
+          const map = new AMap.Map(mapContainerRef.current);
+          let toolbar = new AMap.ToolBar();
+          /* 设置地图实例 */
+          mapRef.current = map;
+          /* 添加工具条 */
+          mapRef.current.addControl(toolbar);
+          /* 地图初始化定位 */
+          getUserlocation(AMap);
+          /* 实时天气查询 */
+          getCityWeather(AMap,mapRef.current);
+          
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+        return () => {
+          if (mapRef.current){
+            mapRef.current.destroy();
+          }
+        };
+      });
+
     }
-    AMapLoader.load({
-      key: 'aa6c92a807de065ca1e75689bdbafc07',
-      version: '2.0',
-      plugins: ['AMap.Geocoder', 'AMap.PlaceSearch',  'AMap.ToolBar', 
-      'AMap.Driving',"AMap.Walking", "AMap.Weather","AMap.Transfer","AMap.Riding","AMap.Geolocation","AMap.CitySearch"],
-     
-    })
-    .then((AMap) => {
-      const map = new AMap.Map(mapContainerRef.current);
-      let toolbar = new AMap.ToolBar();
-      /* 设置地图实例 */
-      mapRef.current = map;
-      /* 添加工具条 */
-      mapRef.current.addControl(toolbar);
-      /* 地图初始化定位 */
-      getUserlocation(AMap);
-      /* 实时天气查询 */
-      getCityWeather(AMap,mapRef.current);
-      
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-    return () => {
-      if (mapRef.current){
-        mapRef.current.destroy();
-      }
-      
-    };
+
   }, []);
 
 
   return (
+    <>
+    <Head>
+      {/* <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window._AMapSecurityConfig = {
+                securityJsCode: "${process.env.NEXT_PUBLIC_AMAP_SECURITY_KEY}"
+              };
+            `
+          }}
+        /> */}
+    </Head>
     <div className={`${themeMode} w-full h-full grounded-lg flex`}>
       {
         showWeatherResult && !closeWeatherHook ? showWeatherHook(showWeatherResult) : null
@@ -269,5 +284,6 @@ export default function Map() {
       
       </div>
     </div>
+  </>  
   )
 }

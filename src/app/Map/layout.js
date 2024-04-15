@@ -1,4 +1,3 @@
-import { MapNav } from "./MapNav"
 export default function Layout({children}) {
   
 
