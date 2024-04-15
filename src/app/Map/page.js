@@ -208,14 +208,10 @@ export default function Map() {
   };
 
 
-
-
-  window._AMapSecurityConfig = {
-    securityJsCode: "8354e71f73abf634688a42c35b800e0d",
-  };
-  
-
   useEffect(() => {
+    window._AMapSecurityConfig = {
+      securityJsCode: "8354e71f73abf634688a42c35b800e0d",
+    };  
     AMapLoader.load({
       key: 'aa6c92a807de065ca1e75689bdbafc07',
       version: '2.0',
