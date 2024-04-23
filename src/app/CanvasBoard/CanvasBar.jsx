@@ -19,15 +19,16 @@ export const CanvasBar = ({changeFreeLine}) => {
     const changeTabs = (key) => {
         switch(key){
             case '绘画':{
-                changeFreeLine('isClearing',false);
+                changeFreeLine('type','free');
                 break;
             }
             case '橡皮搽':{
-                changeFreeLine('isClearing',true);
+                changeFreeLine('type','clear');
                 break;
             }
             case '文字绘制':{
-                changeFreeLine('isClearing',false);
+                changeFreeLine('type','text');
+                break;
             };
         }
     };

@@ -22,9 +22,9 @@ export default function CanvasBoard () {
         lastPoint: {x:0,y:0}, //上一次鼠标位置
         newPoint: {x:0,y:0}, //当前鼠标位置
         /* 画笔状态 */
-        isClearing: false, //是否正在清除
         isDrawing: false, //是否正在绘画
         /* 画笔类型 */
+        /* free,rect,circle,triangle,clear,text */
         type: 'free', //作画类型
         /* 文本相关 */
         text: "", //文本内容
@@ -78,42 +78,96 @@ export default function CanvasBoard () {
                 drawTriangle(freeLine.lastPoint.x,freeLine.lastPoint.y,freeLine.newPoint.x,freeLine.newPoint.y);
                 break;
             }
-            // case "text": {
-            //     drawText(freeLine.newPoint.x,freeLine.newPoint.y,freeLine.text);
-            // }
+            case "clear": {
+                drawEraser(freeLine.lastPoint.x,freeLine.lastPoint.y,freeLine.newPoint.x,freeLine.newPoint.y);
+                freeLine.lastPoint = freeLine.newPoint;
+                break;
+            }
         };
        
        
     };
 
-    /* 绘制自由线 */
+    //     ctx.current.strokeStyle = freeLine.color;
+    //     ctx.current.lineCap = "round";
+    //     ctx.current.lineJoin = "round";
+    //     if(freeLine.isClearing){
+    //         const temp = freeLine.lineWidth;
+    //         ctx.current.lineWidth = freeLine.clearWidth;
+    //         ctx.current.save();
+    //         ctx.current.globalCompositeOperation = "destination-out";
+    //         ctx.current.moveTo(x1,y1);
+    //         ctx.current.lineTo(x2,y2);
+    //         ctx.current.stroke();
+    //         ctx.current.closePath();
+    //         ctx.current.clip();
+    //         ctx.current.clearRect(0,0,ctx.current.canvas.width,ctx.current.canvas.height);
+    //         ctx.current.restore();
+    //         ctx.current.lineWidth = temp;
+    //     } else {
+    //         ctx.current.lineWidth = freeLine.lineWidth;
+    //         ctx.current.shadowBlur = freeLine.shadowBlur;
+    //         ctx.current.shadowColor = freeLine.shadowColor;
+    //         ctx.current.beginPath();
+    //         ctx.current.moveTo(x1,y1);
+    //         ctx.current.lineTo(x2,y2);
+    //         ctx.current.stroke();
+    //         ctx.current.closePath();
+    //     }
+    // };
+
+    /** 
+     * @description 自由绘画
+     * @param {number} x1 鼠标按下时的x坐标
+     * @param {number} y1 鼠标按下时的y坐标
+     * @param {number} x2 鼠标当前的x坐标
+     * @param {number} y2 鼠标当前的y坐标
+     * @returns {void}
+     * 
+      */
+
     const drawFreeLine = (x1,y1,x2,y2) => {
+        /* 画笔样式 */
         ctx.current.strokeStyle = freeLine.color;
         ctx.current.lineCap = "round";
         ctx.current.lineJoin = "round";
-        if(freeLine.isClearing){
-            const temp = freeLine.lineWidth;
-            ctx.current.lineWidth = freeLine.clearWidth;
-            ctx.current.save();
-            ctx.current.globalCompositeOperation = "destination-out";
-            ctx.current.moveTo(x1,y1);
-            ctx.current.lineTo(x2,y2);
-            ctx.current.stroke();
-            ctx.current.closePath();
-            ctx.current.clip();
-            ctx.current.clearRect(0,0,ctx.current.canvas.width,ctx.current.canvas.height);
-            ctx.current.restore();
-            ctx.current.lineWidth = temp;
-        } else {
-            ctx.current.lineWidth = freeLine.lineWidth;
-            ctx.current.shadowBlur = freeLine.shadowBlur;
-            ctx.current.shadowColor = freeLine.shadowColor;
-            ctx.current.beginPath();
-            ctx.current.moveTo(x1,y1);
-            ctx.current.lineTo(x2,y2);
-            ctx.current.stroke();
-            ctx.current.closePath();
-        }
+        ctx.current.lineWidth = freeLine.lineWidth;
+        ctx.current.shadowBlur = freeLine.shadowBlur;
+        ctx.current.shadowColor = freeLine.shadowColor;
+        ctx.current.beginPath();
+        ctx.current.moveTo(x1,y1);
+        ctx.current.lineTo(x2,y2);
+        ctx.current.stroke();
+        ctx.current.closePath();
+
+    };
+
+    /** 
+     * @description 橡皮擦使用
+     * @param {number} x1 鼠标按下时的x坐标
+     * @param {number} y1 鼠标按下时的y坐标
+     * @param {number} x2 鼠标当前的x坐标
+     * @param {number} y2 鼠标当前的y坐标
+     * @returns {void}
+      */
+
+    const drawEraser = (x1,y1,x2,y2) => {
+        /* 画笔样式 */
+        ctx.current.strokeStyle = freeLine.color;
+        ctx.current.lineCap = "round";
+        ctx.current.lineJoin = "round";
+        const temp = freeLine.lineWidth;
+        ctx.current.lineWidth = freeLine.clearWidth;
+        ctx.current.save();
+        ctx.current.globalCompositeOperation = "destination-out";
+        ctx.current.moveTo(x1,y1);
+        ctx.current.lineTo(x2,y2);
+        ctx.current.stroke();
+        ctx.current.closePath();
+        ctx.current.clip();
+        ctx.current.clearRect(0,0,ctx.current.canvas.width,ctx.current.canvas.height);
+        ctx.current.restore();
+        ctx.current.lineWidth = temp;
     };
 
     /**
